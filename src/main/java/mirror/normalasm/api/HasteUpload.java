@@ -20,7 +20,7 @@ public final class HasteUpload {
         HttpURLConnection connection = (HttpURLConnection) uploadURL.openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        connection.setRequestProperty("User-Agent", "BlahajASM");
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0(compatible;TwelvefoldASM)");
         connection.setFixedLengthStreamingMode(bytes.length);
         connection.setDoInput(true);
         connection.setDoOutput(true);

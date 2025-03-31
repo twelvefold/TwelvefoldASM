@@ -27,7 +27,7 @@ public class NormalTransformer implements IClassTransformer {
     Multimap<String, Function<byte[], byte[]>> transformations;
 
     public NormalTransformer() {
-        NormalLogger.instance.info("BlahajASM is now preparing to bytecode manipulate your game.:3");
+        NormalLogger.instance.info("TwelvefoldASM is now preparing to bytecode manipulate your game.:3");
         isOptifineInstalled = NormalReflector.doesClassExist("optifine.OptiFineForgeTweaker");
         isSodiumPortInstalled = NormalReflector.doesClassExist("me.jellysquid.mods.sodium.client.SodiumMixinTweaker");
         if (squashBakedQuads) {

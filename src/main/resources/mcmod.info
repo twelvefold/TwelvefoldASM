@@ -1,14 +1,14 @@
 [
 {
   "modid": "normalasm",
-  "name": "BlahajASM",
-  "description": "Blahaj has bytecode manipulated your game. :3",
+  "name": "TwelvefoldASM",
+  "description": "Twelvefold has bytecode manipulated your game. :3",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "https://github.com/valiray/BlahajASM",
+  "url": "https://github.com/twelvefold/TwelvefoldASM",
   "updateUrl": "",
-  "authorList": ["Rongmario", "mirrorcult", "skmedix", "fonnymunkey", "Valiray"],
-  "logoFile": "assets/normalasm/blahajasm.png",
+  "authorList": ["Rongmario", "mirrorcult", "skmedix", "fonnymunkey", "Valiray","tong-ge"],
+  "logoFile": "assets/normalasm/twelvefoldasm.png",
   "screenshots": [],
   "dependencies": []
 }
