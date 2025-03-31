@@ -32,4 +32,4 @@ jobs:
         with:
           name: jars
           path: |
-            **/build/libs/BlahajASM-*.*.jar
+            **/build/libs/TwelvefoldASM-*.*.jar

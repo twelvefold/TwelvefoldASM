@@ -1,34 +1,32 @@
 package mirror.normalasm.core;
 
+import com.google.common.collect.Lists;
+import mirror.normalasm.NormalLogger;
+import mirror.normalasm.UnsafeNormal;
+import mirror.normalasm.api.DeobfuscatingRewritePolicy;
+import mirror.normalasm.api.StacktraceDeobfuscator;
+import mirror.normalasm.config.NormalConfig;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.common.ForgeVersion;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
-import mirror.normalasm.UnsafeNormal;
-import mirror.normalasm.config.NormalConfig;
-import mirror.normalasm.NormalLogger;
-import mirror.normalasm.api.DeobfuscatingRewritePolicy;
-import mirror.normalasm.api.StacktraceDeobfuscator;
-import zone.rong.mixinbooter.IEarlyMixinLoader;
+import twelvefold.twelvefoldbooter.TwelvefoldRegistryAPI;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 @IFMLLoadingPlugin.Name("NormalASM")
 @IFMLLoadingPlugin.MCVersion(ForgeVersion.mcVersion)
-public class NormalLoadingPlugin implements IFMLLoadingPlugin, IEarlyMixinLoader {
+public class NormalLoadingPlugin implements IFMLLoadingPlugin{
 
     public static final String VERSION = "5.28";
 
@@ -40,8 +38,8 @@ public class NormalLoadingPlugin implements IFMLLoadingPlugin, IEarlyMixinLoader
     public static final boolean isClient = FMLLaunchHandler.side() == Side.CLIENT;
 
     public NormalLoadingPlugin() {
-        NormalLogger.instance.info("BlahajASM is on the {}-side.", isClient ? "client" : "server");
-        NormalLogger.instance.info("BlahajASM is preparing and loading in mixins since Rongmario's too lazy to write pure ASM at times despite the mod being called 'BlahajASM'");
+        NormalLogger.instance.info("TwelvefoldASM is on the {}-side.", isClient ? "client" : "server");
+        NormalLogger.instance.info("TwelvefoldASM is preparing and loading in mixins since Rongmario's too lazy to write pure ASM at times despite the mod being called 'TwelvefoldASM'");
         if (NormalConfig.instance.outdatedCaCertsFix) {
             try (InputStream is = this.getClass().getResource("/cacerts").openStream()) {
                 File cacertsCopy = File.createTempFile("cacerts", "");
@@ -90,12 +88,21 @@ public class NormalLoadingPlugin implements IFMLLoadingPlugin, IEarlyMixinLoader
                     }
                 }
                 if (needToDGSFFFF) {
-                    NormalLogger.instance.fatal("BlahajASM notices that you're using Eclipse OpenJ9 {}!", SystemUtils.JAVA_VERSION);
+                    NormalLogger.instance.fatal("TwelvefoldASM notices that you're using Eclipse OpenJ9 {}!", SystemUtils.JAVA_VERSION);
                     NormalLogger.instance.fatal("This OpenJ9 version is outdated and contains a critical bug: https://github.com/eclipse-openj9/openj9/issues/8353");
                     NormalLogger.instance.fatal("Either use '-Xjit:disableGuardedStaticFinalFieldFolding' as part of your java arguments, or update OpenJ9!");
                 }
             }
         }
+        NormalLogger.instance.info("TwelvefoldASM enqueueing early mixins");
+        for(String config : earlyList) {
+            TwelvefoldRegistryAPI.enqueueMixin(false, config, () -> shouldMixinConfigQueueEarly(config));
+        }
+        NormalLogger.instance.info("TwelvefoldASM enqueueing late mixins");
+        for(String config : lateList) {
+            TwelvefoldRegistryAPI.enqueueMixin(true, config, () -> shouldMixinConfigQueueLate(config));
+        }
+        NormalLogger.instance.info("TwelvefoldASM finished mixin enqueue");
     }
 
     @Override
@@ -121,9 +128,8 @@ public class NormalLoadingPlugin implements IFMLLoadingPlugin, IEarlyMixinLoader
         return "mirror.normalasm.core.NormalTransformer";
     }
 
-    @Override
-    public List<String> getMixinConfigs() {
-        return isClient ? Arrays.asList(
+
+    private static final List<String> earlyList=isClient ? Arrays.asList(
                 "mixins.devenv.json",
                 "mixins.internal.json",
                 "mixins.vanities.json",
@@ -165,10 +171,9 @@ public class NormalLoadingPlugin implements IFMLLoadingPlugin, IEarlyMixinLoader
                         "mixins.priorities.json",
                         "mixins.crashes.json",
                         "mixins.fix_mc129057.json");
-    }
 
-    @Override
-    public boolean shouldMixinConfigQueue(String mixinConfig) {
+
+    public boolean shouldMixinConfigQueueEarly(String mixinConfig) {
         if (FMLLaunchHandler.isDeobfuscatedEnvironment() && "mixins.devenv.json".equals(mixinConfig)) {
             return true;
         }
@@ -216,5 +221,44 @@ public class NormalLoadingPlugin implements IFMLLoadingPlugin, IEarlyMixinLoader
         }
         return true;
     }
-
+    public static final List<String> lateList= Lists.newArrayList(
+            "mixins.bakedquadsquasher.json",
+            "mixins.modfixes_immersiveengineering.json",
+            "mixins.modfixes_astralsorcery.json",
+            "mixins.capability_astralsorcery.json",
+            "mixins.modfixes_evilcraftcompat.json",
+            "mixins.modfixes_ebwizardry.json",
+            "mixins.modfixes_xu2.json",
+            "mixins.modfixes_b3m.json",
+            "mixins.searchtree_mod.json",
+            "mixins.modfixes_railcraft.json",
+            "mixins.modfixes_disable_broken_particles.json");
+    public boolean shouldMixinConfigQueueLate(String mixinConfig) {
+        switch (mixinConfig) {
+            case "mixins.bakedquadsquasher.json":
+                return NormalTransformer.squashBakedQuads;
+            case "mixins.modfixes_immersiveengineering.json":
+                return NormalConfig.instance.fixBlockIEBaseArrayIndexOutOfBoundsException && Loader.isModLoaded("immersiveengineering");
+            case "mixins.modfixes_evilcraftcompat.json":
+                return NormalConfig.instance.repairEvilCraftEIOCompat && Loader.isModLoaded("evilcraftcompat") && Loader.isModLoaded("enderio") &&
+                        Loader.instance().getIndexedModList().get("enderio").getVersion().equals("5.3.70"); // Only apply on newer EIO versions where compat was broken
+            case "mixins.modfixes_ebwizardry.json":
+                return NormalConfig.instance.optimizeArcaneLockRendering && Loader.isModLoaded("ebwizardry");
+            case "mixins.modfixes_xu2.json":
+                return (NormalConfig.instance.fixXU2CrafterCrash || NormalConfig.instance.disableXU2CrafterRendering) && Loader.isModLoaded("extrautils2");
+            case "mixins.searchtree_mod.json":
+                return NormalConfig.instance.replaceSearchTreeWithJEISearching && Loader.isModLoaded("jei");
+            case "mixins.modfixes_astralsorcery.json":
+                return NormalConfig.instance.optimizeAmuletRelatedFunctions && Loader.isModLoaded("astralsorcery");
+            case "mixins.capability_astralsorcery.json":
+                return NormalConfig.instance.fixAmuletHolderCapability && Loader.isModLoaded("astralsorcery");
+            case "mixins.modfixes_b3m.json":
+                return NormalConfig.instance.resourceLocationCanonicalization && Loader.isModLoaded("B3M"); // Stupid
+            case "mixins.modfixes_railcraft.json":
+                return NormalConfig.instance.efficientHashing && Loader.isModLoaded("railcraft");
+            case "mixins.modfixes_disable_broken_particles.json":
+                return NormalConfig.instance.disableBrokenParticles;
+        }
+        return false;
+    }
 }

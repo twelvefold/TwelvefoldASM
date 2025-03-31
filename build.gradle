@@ -46,9 +46,6 @@ repositories {
         url 'https://repo.spongepowered.org/maven'
     }
     maven {
-        url 'https://maven.cleanroommc.com'
-    }
-    maven {
         url 'http://chickenbones.net/maven'
         allowInsecureProtocol = true
     }
@@ -85,7 +82,7 @@ repositories {
 
 dependencies {
     embed 'me.nallar.whocalled:WhoCalled:1.1'
-    implementation 'zone.rong:mixinbooter:7.1'
+    implementation files("./libs/`TwelvefoldBooter-195ea8d08df.jar")
     compileOnly 'com.enderio.core:EnderCore:1.12.2-+'
     compileOnly ('com.enderio:EnderIO:1.12.2-+') {
         transitive = false
@@ -112,7 +109,7 @@ dependencies {
     compileOnly rfg.deobf('curse.maven:gottschcore-272450:3748293')
     compileOnly rfg.deobf('curse.maven:treasure2-289760:3758107')
     compileOnly rfg.deobf('curse.maven:time-speed-mod-221053:2991593')
-    compileOnly rfg.deobf('curse.maven:gregtech-ce-unofficial-557242:3745499')
+    //compileOnly rfg.deobf('curse.maven:gregtech-ce-unofficial-557242:3745499')
     compileOnly rfg.deobf("curse.maven:railcraft-51195:3853491")
 
     api ('org.spongepowered:mixin:0.8.3') {
