@@ -14,7 +14,7 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
-import twelvefold.twelvefoldbooter.TwelvefoldRegistryAPI;
+import twelvefold.twelvefoldbooter.api.TwelvefoldRegistryAPI;
 
 import java.io.File;
 import java.io.InputStream;
@@ -95,6 +95,7 @@ public class NormalLoadingPlugin implements IFMLLoadingPlugin{
             }
         }
         NormalLogger.instance.info("TwelvefoldASM enqueueing early mixins");
+        /*
         for(String config : earlyList) {
             TwelvefoldRegistryAPI.enqueueMixin(false, config, () -> shouldMixinConfigQueueEarly(config));
         }
@@ -102,6 +103,9 @@ public class NormalLoadingPlugin implements IFMLLoadingPlugin{
         for(String config : lateList) {
             TwelvefoldRegistryAPI.enqueueMixin(true, config, () -> shouldMixinConfigQueueLate(config));
         }
+
+         */
+        TwelvefoldRegistryAPI.enqueueEarlyMixin(this::shouldMixinConfigQueueEarly, earlyList);
         NormalLogger.instance.info("TwelvefoldASM finished mixin enqueue");
     }
 
@@ -129,48 +133,49 @@ public class NormalLoadingPlugin implements IFMLLoadingPlugin{
     }
 
 
-    private static final List<String> earlyList=isClient ? Arrays.asList(
-                "mixins.devenv.json",
-                "mixins.internal.json",
-                "mixins.vanities.json",
-                "mixins.registries.json",
-                "mixins.stripitemstack.json",
-                "mixins.lockcode.json",
-                "mixins.recipes.json",
-                "mixins.misc_fluidregistry.json",
-                "mixins.forgefixes.json",
-                "mixins.capability.json",
-                "mixins.singletonevents.json",
-                "mixins.efficienthashing.json",
-                "mixins.crashes.json",
-                "mixins.fix_mc129057.json",
-                "mixins.bucket.json",
-                "mixins.priorities.json",
-                "mixins.rendering.json",
-                "mixins.datastructures_modelmanager.json",
-                "mixins.screenshot.json",
-                "mixins.ondemand_sprites.json",
-                "mixins.searchtree_vanilla.json",
-                "mixins.resolve_mc2071.json",
-                "mixins.fix_mc_skindownloading.json",
-                "mixins.fix_mc186052.json") :
-                Arrays.asList(
-                        "mixins.devenv.json",
-                        "mixins.vfix_bugfixes.json",
-                        "mixins.internal.json",
-                        "mixins.vanities.json",
-                        "mixins.registries.json",
-                        "mixins.stripitemstack.json",
-                        "mixins.lockcode.json",
-                        "mixins.recipes.json",
-                        "mixins.misc_fluidregistry.json",
-                        "mixins.forgefixes.json",
-                        "mixins.capability.json",
-                        "mixins.singletonevents.json",
-                        "mixins.efficienthashing.json",
-                        "mixins.priorities.json",
-                        "mixins.crashes.json",
-                        "mixins.fix_mc129057.json");
+    private static final String[] earlyList=isClient ? new String[]{
+            "mixins.devenv.json",
+            "mixins.internal.json",
+            "mixins.vanities.json",
+            "mixins.registries.json",
+            "mixins.stripitemstack.json",
+            "mixins.lockcode.json",
+            "mixins.recipes.json",
+            "mixins.misc_fluidregistry.json",
+            "mixins.forgefixes.json",
+            "mixins.capability.json",
+            "mixins.singletonevents.json",
+            "mixins.efficienthashing.json",
+            "mixins.crashes.json",
+            "mixins.fix_mc129057.json",
+            "mixins.bucket.json",
+            "mixins.priorities.json",
+            "mixins.rendering.json",
+            "mixins.datastructures_modelmanager.json",
+            "mixins.screenshot.json",
+            "mixins.ondemand_sprites.json",
+            "mixins.searchtree_vanilla.json",
+            "mixins.resolve_mc2071.json",
+            "mixins.fix_mc_skindownloading.json",
+            "mixins.fix_mc186052.json"} :
+            new String[]{
+                    "mixins.devenv.json",
+                    "mixins.vfix_bugfixes.json",
+                    "mixins.internal.json",
+                    "mixins.vanities.json",
+                    "mixins.registries.json",
+                    "mixins.stripitemstack.json",
+                    "mixins.lockcode.json",
+                    "mixins.recipes.json",
+                    "mixins.misc_fluidregistry.json",
+                    "mixins.forgefixes.json",
+                    "mixins.capability.json",
+                    "mixins.singletonevents.json",
+                    "mixins.efficienthashing.json",
+                    "mixins.priorities.json",
+                    "mixins.crashes.json",
+                    "mixins.fix_mc129057.json"
+            };
 
 
     public boolean shouldMixinConfigQueueEarly(String mixinConfig) {
@@ -220,45 +225,5 @@ public class NormalLoadingPlugin implements IFMLLoadingPlugin{
                 return NormalConfig.instance.threadPriorityFix;
         }
         return true;
-    }
-    public static final List<String> lateList= Lists.newArrayList(
-            "mixins.bakedquadsquasher.json",
-            "mixins.modfixes_immersiveengineering.json",
-            "mixins.modfixes_astralsorcery.json",
-            "mixins.capability_astralsorcery.json",
-            "mixins.modfixes_evilcraftcompat.json",
-            "mixins.modfixes_ebwizardry.json",
-            "mixins.modfixes_xu2.json",
-            "mixins.modfixes_b3m.json",
-            "mixins.searchtree_mod.json",
-            "mixins.modfixes_railcraft.json",
-            "mixins.modfixes_disable_broken_particles.json");
-    public boolean shouldMixinConfigQueueLate(String mixinConfig) {
-        switch (mixinConfig) {
-            case "mixins.bakedquadsquasher.json":
-                return NormalTransformer.squashBakedQuads;
-            case "mixins.modfixes_immersiveengineering.json":
-                return NormalConfig.instance.fixBlockIEBaseArrayIndexOutOfBoundsException && Loader.isModLoaded("immersiveengineering");
-            case "mixins.modfixes_evilcraftcompat.json":
-                return NormalConfig.instance.repairEvilCraftEIOCompat && Loader.isModLoaded("evilcraftcompat") && Loader.isModLoaded("enderio") &&
-                        Loader.instance().getIndexedModList().get("enderio").getVersion().equals("5.3.70"); // Only apply on newer EIO versions where compat was broken
-            case "mixins.modfixes_ebwizardry.json":
-                return NormalConfig.instance.optimizeArcaneLockRendering && Loader.isModLoaded("ebwizardry");
-            case "mixins.modfixes_xu2.json":
-                return (NormalConfig.instance.fixXU2CrafterCrash || NormalConfig.instance.disableXU2CrafterRendering) && Loader.isModLoaded("extrautils2");
-            case "mixins.searchtree_mod.json":
-                return NormalConfig.instance.replaceSearchTreeWithJEISearching && Loader.isModLoaded("jei");
-            case "mixins.modfixes_astralsorcery.json":
-                return NormalConfig.instance.optimizeAmuletRelatedFunctions && Loader.isModLoaded("astralsorcery");
-            case "mixins.capability_astralsorcery.json":
-                return NormalConfig.instance.fixAmuletHolderCapability && Loader.isModLoaded("astralsorcery");
-            case "mixins.modfixes_b3m.json":
-                return NormalConfig.instance.resourceLocationCanonicalization && Loader.isModLoaded("B3M"); // Stupid
-            case "mixins.modfixes_railcraft.json":
-                return NormalConfig.instance.efficientHashing && Loader.isModLoaded("railcraft");
-            case "mixins.modfixes_disable_broken_particles.json":
-                return NormalConfig.instance.disableBrokenParticles;
-        }
-        return false;
     }
 }

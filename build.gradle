@@ -8,8 +8,7 @@ plugins {
     id 'com.gtnewhorizons.retrofuturagradle' version '1.3.9'
     id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
-
-version = project.mod_version
+version = String.format("%x",System.currentTimeMillis())
 group = project.maven_group
 archivesBaseName = project.archives_base_name
 
@@ -82,7 +81,7 @@ repositories {
 
 dependencies {
     embed 'me.nallar.whocalled:WhoCalled:1.1'
-    implementation files("./libs/`TwelvefoldBooter-195ea8d08df.jar")
+    implementation files("./libs/`TwelvefoldBooter-195ff2700da.jar")
     compileOnly 'com.enderio.core:EnderCore:1.12.2-+'
     compileOnly ('com.enderio:EnderIO:1.12.2-+') {
         transitive = false
